@@ -1,0 +1,2463 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microeconomics Inc</title>
+    <link rel="shortcut icon" href="images/fav.jpg" type="image/png">
+    <script src="js/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+    <script src="js/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@phantom-labs/inject-ethereum-provider"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Arial", sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        /* Updated color palette */
+        :root {
+            --primary: #4900ff;  /* Vibrant purple-blue */
+            --secondary: #00c8ff;  /* Cyan */
+            --accent: #ff4900;  /* Orange */
+            --dark-bg: #121212;
+            --darker-bg: #0a0a0a;
+            --light-text: #f0f0f0;
+            --dark-text: #333;
+            --positive: #00ff8f;  /* Bright green */
+            --negative: #ff0062;  /* Pink-red */
+            --neutral: #7a7a7a;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4900ff;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a00cc;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background-color: #000;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 20px;
+            align-items: center;
+            font-size: 13px;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        .top-nav .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav .logo span {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+
+        .top-nav .logo::after {
+            content: "";
+            display: inline-block;
+            width: 120px;
+            height: 20px;
+            background: url("images/MW-LOGO.png")
+            no-repeat;
+            background-size: contain;
+            filter: invert(1);
+        }
+
+        .top-nav .links a {
+            color: #b3c5c8;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .top-nav .links a:hover {
+            color: var(--secondary);
+        }
+
+        .top-nav .actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav .actions span {
+            margin-right: 10px;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .top-nav .actions button {
+            background-color: var(--accent);
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .top-nav .actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(255, 73, 0, 0.3);
+        }
+
+        /* Breaking News Banner */
+        .breaking-news {
+            background-color: #121212;
+            padding: 8px 20px;
+            border-bottom: 1px solid var(--accent);
+            color: var(--negative);
+            font-weight: bold;
+            font-size: 13px;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .breaking-news a {
+            color: var(--negative);
+            text-decoration: none;
+        }
+
+        /* Market Data Bar */
+        .market-data {
+            background-color: #121212;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            border-bottom: 1px solid #333;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .market-data a {
+            color: var(--secondary);
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+
+        .market-data span {
+            margin-right: 20px;
+        }
+
+        .market-data .positive {
+            color: var(--positive);
+        }
+
+        .market-data .negative {
+            color: var(--negative);
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb {
+            padding: 10px 20px;
+            font-size: 12px;
+            background-color: #121212;
+        }
+
+        .breadcrumb a {
+            color: var(--secondary);
+            text-decoration: none;
+            margin-right: 5px;
+        }
+
+        .breadcrumb span {
+            color: var(--neutral);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            padding: 0 20px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .left-section {
+            flex: 3;
+            margin-right: 20px;
+        }
+
+        .stock-info {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .stock-info .quote-switch {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: var(--neutral);
+        }
+
+        .stock-info .quote-switch a {
+            color: var(--secondary);
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .stock-info .quote-switch span {
+            color: var(--neutral);
+        }
+
+        .stock-info h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+
+        .stock-info .status-bar {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .stock-info .status-bar span {
+            background-color: #333;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: var(--light-text);
+        }
+
+        .stock-info .status-bar a {
+            color: var(--secondary);
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .stock-info .status-bar button {
+            background-color: #333;
+            border: 1px solid #444;
+            padding: 2px 8px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+            border-radius: 3px;
+            color: var(--light-text);
+        }
+
+        .stock-info .status-bar button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .stock-info .price {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--positive);
+            margin-bottom: 5px;
+        }
+
+        .stock-info .change {
+            font-size: 14px;
+            color: var(--positive);
+            margin-bottom: 5px;
+        }
+
+        .stock-info .change::before {
+            content: "▲";
+            margin-right: 5px;
+        }
+
+        .stock-info .last-updated {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-bottom: 20px;
+        }
+
+        .stock-info .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .stock-info .data-points {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .stock-info .data-points div {
+            flex: 1;
+        }
+
+        .stock-info .data-points div strong {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--light-text);
+        }
+
+        .stock-info .data-points div {
+            color: var(--neutral);
+        }
+
+        /* Subscription Banner */
+        .subscription-banner {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+
+        .subscription-banner button {
+            background-color: var(--accent);
+            border: none;
+            padding: 5px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .subscription-banner button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-top: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .tabs a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: var(--neutral);
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tabs a:hover {
+            background-color: #1e1e1e;
+        }
+
+        .tabs a.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--light-text);
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: #121212;
+            border: 1px solid #333;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Lower Content Section */
+        .lower-content {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .lower-left {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .lower-right {
+            flex: 2;
+        }
+
+        /* Key Data */
+        .key-data {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .key-data h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .key-data .data-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+
+        /* Performance Section */
+        .performance {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .performance h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .performance .data-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+
+        .performance .positive {
+            color: var(--positive);
+        }
+
+        .performance .negative {
+            color: var(--negative);
+        }
+
+        /* Top Performers Section */
+        .top-performers {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .top-performers h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .top-performers table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .top-performers table th,
+        .top-performers table td {
+            padding: 8px 5px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .top-performers table th {
+            font-weight: normal;
+            color: var(--neutral);
+            font-size: 12px;
+        }
+
+        .top-performers table td {
+            color: var(--light-text);
+        }
+
+        .top-performers table .positive {
+            color: var(--positive);
+        }
+
+        /* Bottom Performers Section */
+        .bottom-performers {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .bottom-performers h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .bottom-performers table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .bottom-performers table th,
+        .bottom-performers table td {
+            padding: 8px 5px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .bottom-performers table th {
+            font-weight: normal;
+            color: var(--neutral);
+            font-size: 12px;
+        }
+
+        .bottom-performers table td {
+            color: var(--light-text);
+        }
+
+        .bottom-performers table .negative {
+            color: var(--negative);
+        }
+
+        /* Recent News */
+        .recent-news {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .recent-news h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .recent-news .news-tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .recent-news .news-tabs button {
+            background-color: #333;
+            border: none;
+            padding: 4px 12px;
+            margin-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--light-text);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recent-news .news-tabs button:hover {
+            background-color: #444;
+        }
+
+        .recent-news .news-tabs button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .recent-news .news-item {
+            display: flex;
+            margin-bottom: 15px;
+            font-size: 13px;
+            align-items: flex-start;
+            transition: all 0.3s;
+        }
+
+        .recent-news .news-item:hover {
+            transform: translateX(5px);
+        }
+
+        .recent-news .news-item img {
+            width: 80px;
+            height: 60px;
+            object-fit: contain;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+
+        .recent-news .news-item .content {
+            flex: 1;
+        }
+
+        .recent-news .news-item .content .headline {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+
+        .recent-news .news-item .content .headline .source {
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .recent-news .news-item .content .headline a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .recent-news .news-item .content p {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-top: 0;
+        }
+
+        /* Other News */
+        .other-news {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .other-news h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .other-news .news-item {
+            display: flex;
+            margin-bottom: 15px;
+            font-size: 13px;
+            align-items: flex-start;
+            transition: all 0.3s;
+        }
+
+        .other-news .news-item:hover {
+            transform: translateX(5px);
+        }
+
+        .other-news .news-item img {
+            width: 80px;
+            height: 60px;
+            object-fit: contain;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+
+        .other-news .news-item .content {
+            flex: 1;
+        }
+
+        .other-news .news-item .content .headline {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+
+        .other-news .news-item .content .headline .source {
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .other-news .news-item .content .headline a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .other-news .news-item .content p {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-top: 0;
+        }
+
+        /* Major Stock Indexes */
+        .major-indexes {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .major-indexes h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .major-indexes .index-group {
+            margin-bottom: 20px;
+        }
+
+        .major-indexes .index-group h4 {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--light-text);
+            margin-bottom: 10px;
+        }
+
+        .major-indexes table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .major-indexes table th,
+        .major-indexes table td {
+            padding: 8px 5px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .major-indexes table th {
+            font-weight: normal;
+            color: var(--neutral);
+            font-size: 12px;
+        }
+
+        .major-indexes table td {
+            color: var(--light-text);
+        }
+
+        .major-indexes table .positive {
+            color: var(--positive);
+        }
+
+        .major-indexes table .negative {
+            color: var(--negative);
+        }
+
+        .right-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* Watchlist */
+        .watchlist {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .watchlist h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+
+        .watchlist p {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .watchlist button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .watchlist button:hover {
+            background-color: #3a00cc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .watchlist table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .watchlist table th,
+        .watchlist table td {
+            padding: 8px 5px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .watchlist table th {
+            font-weight: normal;
+            color: var(--neutral);
+            font-size: 12px;
+        }
+
+        .watchlist table td {
+            color: var(--light-text);
+        }
+
+        .watchlist table .positive {
+            color: var(--positive);
+        }
+
+        /* Recently Viewed Tickers */
+        .recent-tickers {
+            background-color: #121212;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .recent-tickers h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .recent-tickers table {
+            width: 100%;
+            font-size: 13px;
+        }
+
+        .recent-tickers table td {
+            padding: 5px;
+            color: var(--light-text);
+        }
+
+        .recent-tickers .positive {
+            color: var(--positive);
+        }
+
+        .recent-tickers .positive::before {
+            content: "▲";
+            margin-right: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #000;
+            color: white;
+            padding: 40px 20px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top: 1px solid var(--primary);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 20px;
+        }
+
+        .footer-branding {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .footer-logo span {
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .social-links a:hover {
+            color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .footer-links a {
+            color: #b3c5c8;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .copyright {
+            color: #b3c5c8;
+            font-size: 11px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .copyright a {
+            color: #b3c5c8;
+            text-decoration: none;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-to-top:hover {
+            background-color: #3a00cc;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Top gray bar */
+        .top-gray-bar {
+            background-color: #1e1e1e;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 20px;
+            font-size: 12px;
+            color: var(--neutral);
+            border-bottom: 1px solid #333;
+        }
+
+        .top-gray-bar a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        .top-links span {
+            margin-right: 8px;
+        }
+
+        /* Main black header */
+        .main-header {
+            background-color: #000;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        .left-section1 {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.2);
+            color: var(--secondary);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo .green {
+            color: var(--secondary);
+        }
+
+        .center-section a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .center-section a:hover {
+            color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .right-section1 {
+            display: flex;
+            align-items: center;
+        }
+
+        .subscribe-btn {
+            background-color: var(--accent);
+            border: none;
+            color: black;
+            padding: 5px 10px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .subscribe-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.2);
+            color: var(--secondary);
+        }
+
+        /* Live price ticker */
+        .live-price {
+            animation: colorPulse 2s infinite;
+        }
+
+        @keyframes colorPulse {
+            0% { color: var(--positive); }
+            50% { color: #00c853; }
+            100% { color: var(--positive); }
+        }
+
+        /* Market data scrolling */
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .market-data-scroll {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scroll 30s linear infinite;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,85,102,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Phantom wallet button */
+        .phantom-button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .phantom-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .phantom-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Tab content images */
+        .tab-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tab-images img {
+            width: 100%;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+
+        .tab-images img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Historical data table */
+        .historical-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .historical-table th, 
+        .historical-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .historical-table th {
+            background-color: #1e1e1e;
+            font-weight: bold;
+            color: var(--light-text);
+        }
+
+        .historical-table tr:hover {
+            background-color: #1e1e1e;
+        }
+
+        /* Tools grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tool-card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            border: 1px solid #333;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tool-card h4 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .tool-card p {
+            font-size: 13px;
+            color: var(--neutral);
+            margin-bottom: 15px;
+        }
+
+        .tool-card button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .tool-card button:hover {
+            background-color: #3a00cc;
+        }
+
+        /* Glitch effect for logo */
+        .glitch-effect {
+            position: relative;
+                margin-right: 15px;
+        }
+        
+        .glitch-effect::before, .glitch-effect::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+        
+        .glitch-effect::before {
+            color: var(--secondary);
+            z-index: -1;
+            animation: glitch 3s infinite;
+        }
+        
+        .glitch-effect::after {
+            color: var(--primary);
+            z-index: -2;
+            animation: glitch 2s infinite reverse;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+</head>
+<body>
+<!-- Top Navigation Bar -->
+<!-- Top Gray Bar -->
+<div class="top-gray-bar">
+    <div class="top-links">
+        <span>wSj</span> | <span>bArOn'S</span> | <span>Microeconomics Inc</span> |
+        <span>iBd</span>
+    </div>
+    <div class="buy-side-link">
+        <a href="#">bUy sIde fRum wSj</a>
+    </div>
+</div>
+
+<!-- Main Header -->
+<div class="main-header">
+    <div class="left-section1">
+        <button class="menu-btn">☰</button>
+        <div class="logo glitch-effect" data-text="tReNcHmUrKeT">mIcRo<span class="green">EcOnOmIcS InC</span></div>
+          <a href="https://x.com/MicroeconomicsI">
+                <img src="images/favicon.ico" width="16" height="16" alt="x">
+                
+            </a>
+    </div>
+    <div class="center-section">
+        <a href="./stonks.html">sToNkS</a>
+        <a href="./munny.html">uR mUnNy</a>
+        <a href="./old.html">oLd pPl sTuFf</a>
+        <a href="./ekonomee.html">eKoNoMeE</a>
+    </div>
+</div>
+
+<!-- Breaking News Banner -->
+<div class="breaking-news">
+    <a href="#">bReAkInG:</a> dOgEcOiN tO mOoN? eXpErT sAyS "mAyBe lOl" aS mEmE sToNkS rAlLy
+</div>
+
+<!-- Market Data Bar -->
+<div class="market-data">
+    <div class="market-data-scroll">
+        <a href="#">uR mUnNy mEtEr</a>
+        <span>cRyPtO mOvErS</span>
+        <span class="positive">dOgE 🚀 420.69%</span>
+        <span class="positive">sHiB 🚀 69.42%</span>
+        <span class="positive">pEpE 🚀 8008.5%</span>
+        <span class="negative">bTc 💩 -2.0%</span>
+        <span class="negative">eTh 💩 -1.5%</span>
+        <span class="negative">sOl 💩 -3.3%</span>
+        <span>mEmE iNdEx:</span>
+        <span class="positive">📈 69.69%</span>
+        <span>fA iNdEx:</span>
+        <span class="negative">📉 -42.0%</span>
+    </div>
+</div>
+
+<!-- Breadcrumb Navigation -->
+<div class="breadcrumb">
+    <a href="#">hOmE</a> > <a href="#">uR mUnNy</a> >
+    <span>hOw 2 gIt rIcH</span>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Left Section -->
+    <div class="left-section">
+        <div class="stock-info">
+            <div class="quote-switch">
+                <a href="#">sWiTcH pOrTfOlIo</a>
+                <span>uR mUnNy - pErSoNaL fInAnCe (lOl)</span>
+            </div>
+            <h1>uR mUnNy dAsHbOaRd (nO rEfUnDs)</h1>
+            <div class="status-bar">
+                <span>lIvE (uR bRoKe)</span>
+                <a href="#">fAnCy lInEs</a>
+                <button class="active">1d</button>
+                <button>1w</button>
+                <button>1m</button>
+                <button>1y</button>
+                <button>$</button>
+                <button>%</button>
+            </div>
+            <div class="price live-price">$69.42 (sMoL nUmBeR!)</div>
+            <div class="change">▼ 420.69 (86.9%) (uR pOoR)</div>
+            <div class="last-updated">
+                lAsT uPdAtE: <span id="current-time"></span> (rIp uR wAlLeT)
+            </div>
+            <div class="chart-container">
+                <canvas id="munnyChart"></canvas>
+            </div>
+            <div class="data-points">
+                <div>
+                    <strong>pReViOuS bAlAnCe</strong>
+                    <div>$420.69</div>
+                </div>
+                <div>
+                    <strong>dAy rAnGe</strong>
+                    <div>$0.42 - $69.42</div>
+                </div>
+                <div>
+                    <strong>aLl tImE hIgH</strong>
+                    <div>$1,337.00 (2019)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Banner -->
+        <div class="subscription-banner">
+            gIt fInAnCiAl aDvIcE fRoM cAtS fOr oNlY 1 dOgE pEr wEeK!
+            <button id="subscribeBtn">gImMe dAt</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="#" class="tab-link active" data-tab="how2rich">hOw 2 gIt rIcH</a>
+            <a href="#" class="tab-link" data-tab="memefolio">mEmEfOlIo</a>
+            <a href="#" class="tab-link" data-tab="debt">dEbT tRaCkEr</a>
+            <a href="#" class="tab-link" data-tab="advice">bAd aDvIcE</a>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="how2rich" class="tab-content active">
+            <h3>hOw 2 gIt rIcH qUiCk (nO sCaM)</h3>
+            <p>fOlLoW dEsE sImPlE sTePs tO bEcOmE mIlLiOnAiRe (rEsUlTs nOt tYpIcAl)</p>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <img src="images/step1.webp" alt="sTeP 1" style="width:100%;margin-bottom:10px;">
+                    <h4>sTeP 1: bUy hIgH</h4>
+                    <p>wHeN sToNk gO uP, fOmO iN! bUy aT aLl tImE hIgH fOr mAxImUm pRoFiT</p>
+                    <button>yOlO nOw</button>
+                </div>
+                <div class="tool-card">
+                    <img src="images/step2.webp" alt="sTeP 2" style="width:100%;margin-bottom:10px;">
+                    <h4>sTeP 2: sElL lOw</h4>
+                    <p>wHeN sToNk gO dOwN, pAnIc! sElL fOr lOsS tO aVoId mOrE lOsS</p>
+                    <button>pAnIc sElL</button>
+                </div>
+                <div class="tool-card">
+                    <img src="images/step3.webp" alt="sTeP 3" style="width:100%;margin-bottom:10px;">
+                    <h4>sTeP 3: rEpEaT</h4>
+                    <p>kEeP dOiNg tHiS uNtIl eItHeR rIcH oR hOmElEsS (50/50 cHaNcE)</p>
+                    <button>dEgEn mOdE</button>
+                </div>
+                <div class="tool-card">
+                    <img src="images/step4.webp" alt="sTeP 4" style="width:100%;margin-bottom:10px;">
+                    <h4>sTeP 4: bLaMe oThErS</h4>
+                    <p>wHeN bRoKe, bLaMe: 1) fEd 2) sHoRtS 3) eLoN 4) uR cAt</p>
+                    <button>iT's tHeIr fAuLt</button>
+                </div>
+            </div>
+            
+            <div style="margin-top:30px;background:#1e1e1e;padding:20px;border-radius:8px;height: 180px;border:1px solid #333;">
+                <h3 style="margin-bottom: 20px;color:var(--secondary)">pRo tIp fRoM wAlL sTrEeT:</h3>
+                <img src="images/baffet.webp" alt="tRoLlFaCe" style="float:left;width:100px;margin-right:15px;border-radius:4px;">
+                <p>"tHe sEcReT tO iNvEsTiNg iS tO bUy wHeN oThErS aRe fEaRfUl aNd sElL wHeN oThErS aRe gReEdY... 
+                pSyChE! jUsT yOlO oN mEmE sToNkS aNd pRaY."</p>
+                <p style="text-align:right;font-style:italic;color:var(--neutral)">- wArReN bUfFeT (pRoBaBlY)</p>
+            </div>
+        </div>
+
+        <div id="memefolio" class="tab-content">
+            <h3>uR mEmEfOlIo 📊 (100% lEgIt)</h3>
+            
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;flex:1;margin-right:10px;text-align:center;border:1px solid #333;">
+                    <div style="font-size:12px;color:var(--neutral)">tOtAl vAlUe</div>
+                    <div style="font-size:24px;font-weight:bold;color:var(--light-text)">$69.42</div>
+                    <div style="font-size:12px;color:var(--negative)">▼ 86.9%</div>
+                </div>
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;flex:1;margin:0 10px;text-align:center;border:1px solid #333;">
+                    <div style="font-size:12px;color:var(--neutral)">bEsT pErFoRmEr</div>
+                    <div style="font-size:24px;font-weight:bold;color:var(--light-text)">pEpE</div>
+                    <div style="font-size:12px;color:var(--positive)">▲ 8008.5%</div>
+                </div>
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;flex:1;margin-left:10px;text-align:center;border:1px solid #333;">
+                    <div style="font-size:12px;color:var(--neutral)">wOrSt pErFoRmEr</div>
+                    <div style="font-size:24px;font-weight:bold;color:var(--light-text)">401k</div>
+                    <div style="font-size:12px;color:var(--negative)">▼ 99.9%</div>
+                </div>
+            </div>
+            
+            <table class="historical-table">
+                <thead>
+                    <tr>
+                        <th>aSsEt</th>
+                        <th>aMoUnT</th>
+                        <th>vAlUe</th>
+                        <th>% oF pOrTfOlIo</th>
+                        <th>24h</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img src="images/doge.png" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            dOgE
+                        </td>
+                        <td>420.69</td>
+                        <td>$42.00</td>
+                        <td>60.5%</td>
+                        <td class="positive">▲ 420.69%</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/shib.webp" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            sHiB
+                        </td>
+                        <td>69,420,000</td>
+                        <td>$6.90</td>
+                        <td>9.9%</td>
+                        <td class="positive">▲ 69.42%</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/pepe.webp" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            pEpE
+                        </td>
+                        <td>800,813,500</td>
+                        <td>$8.08</td>
+                        <td>11.6%</td>
+                        <td class="positive">▲ 8008.5%</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/btc.png" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            bTc
+                        </td>
+                        <td>0.000042</td>
+                        <td>$0.42</td>
+                        <td>0.6%</td>
+                        <td class="negative">▼ 2.0%</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/eth.svg" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            eTh
+                        </td>
+                        <td>0.00069</td>
+                        <td>$0.69</td>
+                        <td>1.0%</td>
+                        <td class="negative">▼ 1.5%</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/sol.jpg" width="20" height="20" style="vertical-align:middle;margin-right:5px;">
+                            sOl
+                        </td>
+                        <td>0.042</td>
+                        <td>$0.42</td>
+                        <td>0.6%</td>
+                        <td class="negative">▼ 3.3%</td>
+                    </tr>
+            
+                </tbody>
+            </table>
+            
+            <div style="margin-top:20px;text-align:center;">
+                <button style="background:var(--primary);color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;">
+                    bUy mOaR mEmE cOiNs
+                </button>
+            </div>
+        </div>
+
+        <div id="debt" class="tab-content">
+            <h3>dEbT tRaCkEr 💸 (oH nO)</h3>
+            
+            <div style="background:#1e1e1e;padding:20px;border-radius:8px;margin-bottom:20px;border:1px solid var(--negative)">
+                <div style="font-size:24px;font-weight:bold;color:var(--negative);text-align:center;">
+                    tOtAl dEbT: $69,420.69
+                </div>
+                <div style="text-align:center;font-size:12px;color:var(--neutral)">
+                    (tHaT'S lIkE... a lOt oF tEnDiEs)
+                </div>
+            </div>
+            
+            <table class="historical-table">
+                <thead>
+                    <tr>
+                        <th>wHo u oWe</th>
+                        <th>wHy</th>
+                        <th>aMoUnT</th>
+                        <th>dUe dAtE</th>
+                        <th>sTaTuS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>bAnK</td>
+                        <td>"iNvEsTmEnT" iN dOgE</td>
+                        <td>$42,069.00</td>
+                        <td>yEsTeRdAy</td>
+                        <td style="color:var(--negative)">oVeRdUe</td>
+                    </tr>
+                    <tr>
+                        <td>mOm</td>
+                        <td>"tEmPoRaRy lOaN"</td>
+                        <td>$5,000.00</td>
+                        <td>cHrIsTmAs 2023</td>
+                        <td style="color:var(--negative)">oVeRdUe</td>
+                    </tr>
+                    <tr>
+                        <td>cReDiT cArD</td>
+                        <td>oNlYfAnS sUbScRiPtIoNs</td>
+                        <td>$1,337.00</td>
+                        <td>aPr 30, 2025</td>
+                        <td style="color:var(--accent)">dUe sOoN</td>
+                    </tr>
+                    <tr>
+                        <td>iRs</td>
+                        <td>fOrGoT tO pAy tAxEs lOl</td>
+                        <td>$20,000.00</td>
+                        <td>aPr 15, 2025</td>
+                        <td style="color:var(--negative)">oVeRdUe</td>
+                    </tr>
+                    <tr>
+                        <td>rOoMmAtE</td>
+                        <td>rEnT (fOrGoT aGaIn)</td>
+                        <td>$800.00</td>
+                        <td>mAy 1, 2025</td>
+                        <td style="color:var(--positive)">pEnDiNg</td>
+                    </tr>
+                    <tr>
+                        <td>dRuG dEaLeR</td>
+                        <td>aDdErAlL fOr tRaDiNg</td>
+                        <td>$214.69</td>
+                        <td>aSaP</td>
+                        <td style="color:var(--negative)">oVeRdUe</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top:20px;background:#1e1e1e;padding:20px;border-radius:8px;border:1px solid #333;">
+                <h4 style="color:var(--secondary)">hOw 2 fIx uR dEbT (mAyBe):</h4>
+                <ol style="margin-left:20px;padding-top:10px;color:var(--light-text)">
+                    <li>tAkE oUt nEw cReDiT cArD</li>
+                    <li>bUy mOrE cRyPtO wItH iT</li>
+                    <li>hOpE iT 100x</li>
+                    <li>iF nOt, rEpEaT sTePs 1-3</li>
+                </ol>
+                <p style="font-size:12px;color:var(--neutral);margin-top:10px;">
+                    *nOt fInAnCiAl aDvIcE. mAy rEsUlT iN hOmElEsSnEsS.
+                </p>
+            </div>
+        </div>
+
+        <div id="advice" class="tab-content">
+            <h3>bAd fInAnCiAl aDvIcE 💩 (fReE!)</h3>
+            <p>fRoM "eXpErTs" oN tHe iNtErNeT (tRuSt mE bRo)</p>
+            
+            <div style="margin-top:20px;">
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #333;">
+                    <div style="display:flex;align-items:center;margin-bottom:10px;">
+                        <img src="images/prof1.webp" width="40" height="40" style="border-radius:50%;margin-right:10px;">
+                        <div>
+                            <div style="font-weight:bold;color:var(--light-text)">cRyPtOgUrU420</div>
+                            <div style="font-size:12px;color:var(--neutral)">@rEaLwAlLsTrEeTwOlF (vErIfIeD ✅)</div>
+                        </div>
+                    </div>
+                    <p style="color:var(--light-text)">"sElL yOuR hOuSe aNd bUy pEpE cOiN. tHiS iS nOt a dRiLl. 1000x iNcOmInG nExT wEeK. 
+                    sOuRcEs: tRuSt mE bRo."</p>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span style="font-size:12px;color:var(--neutral)">2,420 lIkEs · 69 rEtArDs</span>
+                        <span style="font-size:12px;color:var(--neutral)">pOsTeD 4/20/2025</span>
+                    </div>
+                </div>
+                
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #333;">
+                    <div style="display:flex;align-items:center;margin-bottom:10px;">
+                        <img src="images/prof2.webp" width="40" height="40" style="border-radius:50%;margin-right:10px;">
+                        <div>
+                            <div style="font-weight:bold;color:var(--light-text)">wOlF oF wAlMaRt</div>
+                            <div style="font-size:12px;color:var(--neutral)">@dIaMoNdHaNdSgUy</div>
+                        </div>
+                    </div>
+                    <p style="color:var(--light-text)">"i pUt mY kIdS' cOlLeGe fUnD iNtO a mEmE sToCk aNd nOw i'M dOwN 99%. bUt i'M sTiLl hOlDiNg 
+                    bEcAuSe dIaMoNd hAnDs 💎🙌. tHiS iS tHe wAy."</p>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span style="font-size:12px;color:var(--neutral)">8,008 lIkEs · 1,337 rEtArDs</span>
+                        <span style="font-size:12px;color:var(--neutral)">pOsTeD 4/1/2025</span>
+                    </div>
+                </div>
+                
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #333;">
+                    <div style="display:flex;align-items:center;margin-bottom:10px;">
+                        <img src="images/prof3.webp" width="40" height="40" style="border-radius:50%;margin-right:10px;">
+                        <div>
+                            <div style="font-weight:bold;color:var(--light-text)">fInAnCe cHaD</div>
+                            <div style="font-size:12px;color:var(--neutral)">@oPtIoNsGaMbLeR</div>
+                        </div>
+                    </div>
+                    <p style="color:var(--light-text)">"0dTe oPtIoNs aRe fReE mOnEy. jUsT yOlO yOuR pAyChEcK iNtO sPy pUtS eVeRy mOnDaY. 
+                    i'Ve lOsT $50k dOiNg tHiS bUt wHeN iT hItS iT'S gOnNa bE hUgE."</p>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span style="font-size:12px;color:var(--neutral)">5,000 lIkEs · 2,500 rEtArDs</span>
+                        <span style="font-size:12px;color:var(--neutral)">pOsTeD 3/15/2025</span>
+                    </div>
+                </div>
+                
+                <div style="background:#1e1e1e;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #333;">
+                    <div style="display:flex;align-items:center;margin-bottom:10px;">
+                        <img src="images/prof4.webp" width="40" height="40" style="border-radius:50%;margin-right:10px;">
+                        <div>
+                            <div style="font-weight:bold;color:var(--light-text)">bItCoIn gRaNdMa</div>
+                            <div style="font-size:12px;color:var(--neutral)">@cRyPtOnAnA</div>
+                        </div>
+                    </div>
+                    <p style="color:var(--light-text)">"i dOn'T uNdErStAnD bLoCkChAiN bUt i pUt mY lIfE sAvInGs iNtO a sHiBa iNu cLoNe cAlLeD 
+                    'wOoF wOoF cOiN'. mY gRaNdKiDs sAy iT'S a sCaM bUt tHeY dOn'T uNdErStAnD tHe mEtAvErSe."</p>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span style="font-size:12px;color:var(--neutral)">10,000 lIkEs · 500 rEtArDs</span>
+                        <span style="font-size:12px;color:var(--neutral)">pOsTeD 2/30/2025</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align:center;margin-top:20px;">
+                <button style="background:var(--primary);color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;">
+                    lOaD mOaR bAd aDvIcE
+                </button>
+            </div>
+        </div>
+
+        <!-- Lower Content -->
+        <div class="lower-content">
+            <!-- Lower Left -->
+            <div class="lower-left">
+                <!-- Key Data -->
+                <div class="key-data">
+                    <h3>uR fInAnCiAl hEaLtH</h3>
+                    <div class="data-row">
+                        <span>cReDiT sCoRe</span>
+                        <span style="color:var(--negative)">420 (bAd)</span>
+                    </div>
+                    <div class="data-row">
+                        <span>dEbT-tO-iNcOmE</span>
+                        <span style="color:var(--negative)">69.42 (vErY bAd)</span>
+                    </div>
+                    <div class="data-row">
+                        <span>eMeRgEnCy fUnD</span>
+                        <span style="color:var(--negative)">$0.69 (lOl)</span>
+                    </div>
+                    <div class="data-row">
+                        <span>nEt wOrTh</span>
+                        <span style="color:var(--negative)">-$69,420.69 (yIkEs)</span>
+                    </div>
+                </div>
+
+                <!-- Performance -->
+                <div class="performance">
+                    <h3>uR sPeNdInG</h3>
+                    <div class="data-row">
+                        <span>cRyPtO gAmBlInG</span>
+                        <span style="color:var(--negative)">$5,000/mO</span>
+                    </div>
+                    <div class="data-row">
+                        <span>oNlYfAnS</span>
+                        <span style="color:var(--negative)">$1,337/mO</span>
+                    </div>
+                    <div class="data-row">
+                        <span>fOoD</span>
+                        <span style="color:var(--positive)">$69/mO</span>
+                    </div>
+                    <div class="data-row">
+                        <span>rEnT</span>
+                        <span style="color:var(--positive)">$800/mO</span>
+                    </div>
+                    <div class="data-row">
+                        <span>aDdErAlL</span>
+                        <span style="color:var(--negative)">$214/mO</span>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="top-performers">
+                    <h3>uR bEsT "iNvEsTmEnTs" 🚀</h3>
+                    <table>
+                        <tbody><tr>
+                            <th>wHaT</th>
+                            <th>aMoUnT</th>
+                            <th>rEtUrN</th>
+                        </tr>
+                        <tr>
+                            <td>pEpE cOiN</td>
+                            <td>$100</td>
+                            <td class="positive">8008.5%</td>
+                        </tr>
+                        <tr>
+                            <td>dOgE iN 2021</td>
+                            <td>$50</td>
+                            <td class="positive">4200%</td>
+                        </tr>
+                        <tr>
+                            <td>gMe cAlLs</td>
+                            <td>$500</td>
+                            <td class="positive">1000%</td>
+                        </tr>
+                        <tr>
+                            <td>nFt oF uR cAt</td>
+                            <td>$0.69</td>
+                            <td class="positive">420%</td>
+                        </tr>
+                    </tbody></table>
+                </div>
+
+                <!-- Bottom Performers -->
+                <div class="bottom-performers">
+                    <h3>uR wOrSt "iNvEsTmEnTs" 💩</h3>
+                    <table>
+                        <tbody><tr>
+                            <th>wHaT</th>
+                            <th>aMoUnT</th>
+                            <th>rEtUrN</th>
+                        </tr>
+                        <tr>
+                            <td>dOgE iN 2025</td>
+                            <td>$5,000</td>
+                            <td class="negative">-99%</td>
+                        </tr>
+                        <tr>
+                            <td>fTx tOkEn</td>
+                            <td>$2,000</td>
+                            <td class="negative">-100%</td>
+                        </tr>
+                        <tr>
+                            <td>lUnA cLaSsIc</td>
+                            <td>$1,000</td>
+                            <td class="negative">-100%</td>
+                        </tr>
+                        <tr>
+                            <td>401k</td>
+                            <td>$10,000</td>
+                            <td class="negative">-99.9%</td>
+                        </tr>
+                    </tbody></table>
+                </div>
+            </div>
+
+            <!-- Lower Right -->
+            <div class="lower-right">
+                <div class="recent-news">
+                    <h3>fInAnCiAl "aDvIcE"</h3>
+                    <div class="news-tabs">
+                        <button class="active">rEdDiT</button>
+                        <button>4cHaN</button>
+                        <button>x</button>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm1.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <span class="source">wAlLsTrEeTbEtS</span>
+                                <a href="#">yOlO'D mY kId'S cOlLeGe fUnD oN 0dTe sPy cAlLs - aMa</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 4:20 p.m. eT bY dIaMoNdHaNdS420</p>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm2.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <span class="source">sUpErStOnK</span>
+                                <a href="#">gMe mOaSs tOmOrRoW cOnFiRmEd - 37tH tImE'S tHe cHaRm!</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 3:33 p.m. eT bY aPeNoSeLl</p>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm3.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <span class="source">cRyPtOmOoNs</span>
+                                <a href="#">nEw sHiTcOiN $wOoFy uP 10000% - gEt iN bEfOrE rUg pUlL!</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 2:22 p.m. eT bY cRyPtOpUmPeR</p>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm4.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <span class="source">pErSoNaLfInAnCe</span>
+                                <a href="#">i'M 19 wItH $100k dEbT fRoM cRyPtO - hOw tO rEtIrE bY 20?</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 1:11 p.m. eT bY yOuNgWoLf</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other News -->
+                <div class="other-news">
+                    <h3>fInAnCiAl hOrRoR sToRiEs</h3>
+                    <div class="news-item">
+                        <img src="images/mmm5.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <a href="#">i tOoK a sEcOnD mOrTgAgE tO bUy bItCoIn aT $69k - aMa</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 12:34 p.m. eT bY hOdLgAnG</p>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm6.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <a href="#">sOlD kIdNeY fOr eTh - nOw dOwN 90%. wOrTh iT?</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 11:11 a.m. eT bY vItAlIkFaN69</p>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="images/mmm7.webp" alt="nEwS iMaGe">
+                        <div class="content">
+                            <div class="headline">
+                                <a href="#">qUiT jOb tO tRaDe fUlL-tImE - nOw lIvE iN vAn</a>
+                            </div>
+                            <p>pOsTeD 4/28/2025 aT 10:01 a.m. eT bY vAnLiFeTrAdEr</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Major Stock Indexes -->
+                <div class="major-indexes">
+                    <h3>uR cRyPtO bAg</h3>
+                    <div class="index-group">
+                        <table>
+                            <tbody><tr>
+                                <th>cOiN</th>
+                                <th>aMoUnT</th>
+                                <th>vAlUe</th>
+                                <th>24h</th>
+                            </tr>
+                            <tr>
+                                <td>dOgE</td>
+                                <td>420.69</td>
+                                <td>$42.00</td>
+                                <td class="positive">420.69%</td>
+                            </tr>
+                            <tr>
+                                <td>sHiB</td>
+                                <td>69,420,000</td>
+                                <td>$6.90</td>
+                                <td class="positive">69.42%</td>
+                            </tr>
+                            <tr>
+                                <td>pEpE</td>
+                                <td>800,813,500</td>
+                                <td>$8.08</td>
+                                <td class="positive">8008.5%</td>
+                            </tr>
+                            <tr>
+                                <td>bTc</td>
+                                <td>0.000042</td>
+                                <td>$0.42</td>
+                                <td class="negative">-2.0%</td>
+                            </tr>
+                            <tr>
+                                <td>eTh</td>
+                                <td>0.00069</td>
+                                <td>$0.69</td>
+                                <td class="negative">-1.5%</td>
+                            </tr>
+                            <tr>
+                                <td>sOl</td>
+                                <td>0.042</td>
+                                <td>$0.42</td>
+                                <td class="negative">-3.3%</td>
+                            </tr>
+                        </tbody></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+        <!-- Watchlist -->
+        <div class="watchlist">
+            <h3>uR wAtChLiSt (iF u hAd mOnEy)</h3>
+            <p>sToNkS u wIsH u cOuLd aFfOrD</p>
+            <button id="watchlistBtn">dReAm oN</button>
+            <table>
+                <tbody><tr>
+                    <th>sYmBoL</th>
+                    <th>pRiCe</th>
+                    <th>%</th>
+                </tr>
+                <tr>
+                    <td>gMe</td>
+                    <td>$420.69</td>
+                    <td class="positive">69.42%</td>
+                </tr>
+                <tr>
+                    <td>aMc</td>
+                    <td>$69.42</td>
+                    <td class="negative">-42.0%</td>
+                </tr>
+                <tr>
+                    <td>bBbY</td>
+                    <td>$0.69</td>
+                    <td class="negative">-99.9%</td>
+                </tr>
+                <tr>
+                    <td>tSlA</td>
+                    <td>$800.85</td>
+                    <td class="positive">4.20%</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Recently Viewed Tickers -->
+        <div class="recent-tickers">
+            <h3>uR rEcEnT sEaRcHeS</h3>
+            <table>
+                <tbody><tr>
+                    <td class="positive">hOw 2 gEt rIcH</td>
+                </tr>
+                <tr>
+                    <td class="negative">dEbT rElIeF</td>
+                </tr>
+                <tr>
+                    <td class="positive">fOoD sTaMpS</td>
+                </tr>
+                <tr>
+                    <td class="negative">bAnKrUpTcY lAwYeRs</td>
+                </tr>
+            </tbody></table>
+        </div>
+        
+        <!-- Financial Meme of the Day -->
+        <div class="recent-tickers" style="margin-top:20px;">
+            <h3>fInAnCiAl mEmE oF dAy</h3>
+            <img src="images/mm2.webp" alt="fInAnCiAl mEmE" style="width:100%;border-radius:8px;margin-top:10px;">
+            <p style="text-align:center;font-size:12px;margin-top:5px;color:var(--neutral)">"wHeN u cHeCk uR pOrTfOlIo"</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <div class="footer-branding">
+        <div class="footer-logo">mIcRo<span class="green">EcOnOmIcS InC</span></div>
+        <div class="social-links">
+            <a href="https://x.com/MicroeconomicsI">
+                <img src="images/favicon.ico" width="16" height="16" alt="x">
+                x
+            </a>
+            <a href="#">
+                <img src="images/favicon_1.ico" width="16" height="16" alt="tElEgRaM">
+                tElEgRaM
+            </a>
+            <a href="#">
+                <img src="https://pump.fun/favicon.ico" width="16" height="16" alt="pUmP.fUn">
+                pUmP.fUn
+            </a>
+        </div>
+    </div>
+    
+    <div class="footer-links">
+        <a href="#">aBoUt</a>
+        <a href="#">cOnTaCt</a>
+        <a href="#">cArEeRs</a>
+        <a href="#">aDvErTiSe</a>
+        <a href="#">hElP</a>
+        <a href="#">pRiVaCy</a>
+        <a href="#">tErMs</a>
+    </div>
+    
+    <div class="copyright">
+        © 2025 Microeconomics Inc bUt dUmB. aLl rIgHtS rEsErVeD. nOt fInAnCiAl aDvIcE.
+        <br>
+        <a href="#">dIsClOsUrEs</a> | <a href="#">dO nOt sElL mY iNfO</a>
+    </div>
+</div>
+
+<!-- Back to Top Button -->
+<a href="#" class="back-to-top">uP uP uP</a>
+
+<script>
+    // Real-time clock
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+        document.getElementById('current-time').textContent = timeString;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Generate meme portfolio chart data
+    function generateMunnyData() {
+        const now = Date.now();
+        const data = [];
+        let price = 69.42;
+        
+        // Generate data points for the last 24 hours
+        for (let i = 0; i < 200; i++) {
+            const time = now - (200 - i) * 432000; // 200 points over 24 hours
+            // Extreme volatility for meme portfolio
+            price += (Math.random() - 0.5) * 20;
+            // Keep price in meme range
+            price = Math.max(0.42, Math.min(420.69, price));
+            data.push({
+                x: time,
+                y: price
+            });
+        }
+        
+        return data;
+    }
+
+    // Animated munny chart
+    const ctx = document.getElementById('munnyChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Ur Munny',
+                borderColor: 'var(--negative)',
+                backgroundColor: 'rgba(255, 0, 98, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                lineTension: 0.4,
+                data: generateMunnyData()
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'realtime',
+                    realtime: {
+                        duration: 86400000, // 24 hours
+                        refresh: 1000,
+                        delay: 1000,
+                        onRefresh: chart => {
+                            chart.data.datasets.forEach(dataset => {
+                                const lastPrice = dataset.data[dataset.data.length - 1].y;
+                                let newPrice = lastPrice + (Math.random() - 0.5) * 10;
+                                // Keep price in meme range
+                                newPrice = Math.max(0.42, Math.min(420.69, newPrice));
+                                dataset.data.push({
+                                    x: Date.now(),
+                                    y: newPrice
+                                });
+                            });
+                        }
+                    },
+                    ticks: {
+                        source: 'auto',
+                        autoSkip: true,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        color: 'var(--neutral)'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Value ($)',
+                        color: 'var(--neutral)'
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100,
+                    ticks: {
+                        color: 'var(--neutral)'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.1)'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: '#1e1e1e',
+                    titleColor: 'var(--secondary)',
+                    bodyColor: 'var(--light-text)',
+                    borderColor: 'var(--primary)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return `Ur Munny: $${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                },
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: true
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'xy'
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy'
+                    }
+                }
+            }
+        }
+    });
+
+    // Simulate live price updates for munny
+    function updateMunnyPrice() {
+        const priceElement = document.querySelector('.price');
+        const changeElement = document.querySelector('.change');
+        
+        // Generate random price movement with more volatility
+        const currentPrice = parseFloat(priceElement.textContent.replace(/[^0-9.]/g, ''));
+        const change = (Math.random() - 0.5) * 10;
+        const newPrice = Math.max(0.42, currentPrice + change);
+        const percentChange = (change / currentPrice * 100).toFixed(2);
+        
+        // Update price display
+        priceElement.textContent = '$' + newPrice.toFixed(2) + ' (SMOL NUMBER!)';
+        if (change >= 0) {
+            changeElement.innerHTML = `▲ $${Math.abs(change).toFixed(2)} ${Math.abs(percentChange)}% (less poor!)`;
+            changeElement.style.color = 'var(--positive)';
+            priceElement.style.color = 'var(--positive)';
+        } else {
+            changeElement.innerHTML = `▼ $${Math.abs(change).toFixed(2)} ${Math.abs(percentChange)}% (more poor!)`;
+            changeElement.style.color = 'var(--negative)';
+            priceElement.style.color = 'var(--negative)';
+        }
+        
+        // Random interval for more natural feel
+        setTimeout(updateMunnyPrice, 1000 + Math.random() * 3000);
+    }
+    setTimeout(updateMunnyPrice, 2000);
+
+    // Animate market data scroll
+    function duplicateMarketData() {
+        const scrollContent = document.querySelector('.market-data-scroll');
+        scrollContent.innerHTML += scrollContent.innerHTML;
+    }
+    duplicateMarketData();
+
+    // Tab switching functionality
+    document.querySelectorAll('.tab-link').forEach(tab => {
+        tab.addEventListener('click', e => {
+            e.preventDefault();
+            const tabId = tab.getAttribute('data-tab');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab-link').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Activate current tab
+            tab.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // News tabs
+    document.querySelectorAll('.news-tabs button').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.news-tabs button').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Back to top button
+    document.querySelector('.back-to-top').addEventListener('click', e => {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // Show/hide back to top button based on scroll position
+    window.addEventListener('scroll', function() {
+        const backToTop = document.querySelector('.back-to-top');
+        if (window.pageYOffset > 300) {
+            backToTop.style.display = 'block';
+        } else {
+            backToTop.style.display = 'none';
+        }
+    });
+
+    // Phantom Wallet integration (same as before)
+    const phantomConnect = document.getElementById('phantomConnect');
+    const subscribeBtn = document.getElementById('subscribeBtn');
+    const watchlistBtn = document.getElementById('watchlistBtn');
+    
+    let phantomProvider;
+    let walletConnected = false;
+    let publicKey = null;
+
+    // Check if Phantom is installed
+    async function checkPhantom() {
+        if (window.phantom?.solana?.isPhantom) {
+            phantomProvider = window.phantom.solana;
+            
+            // Check if already connected
+            try {
+                const response = await phantomProvider.connect({ onlyIfTrusted: true });
+                publicKey = response.publicKey.toString();
+                walletConnected = true;
+                updateWalletUI();
+            } catch (error) {
+                // Not connected yet
+                console.log('Phantom not connected');
+            }
+        } else {
+            // Phantom not installed
+            phantomConnect.innerHTML = 'Install Phantom';
+            phantomConnect.onclick = () => window.open('https://phantom.app/', '_blank');
+        }
+    }
+
+    // Connect to Phantom
+    async function connectPhantom() {
+        try {
+            const response = await phantomProvider.connect();
+            publicKey = response.publicKey.toString();
+            walletConnected = true;
+            updateWalletUI();
+            
+            // Show success message
+            alert(`Connected: ${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`);
+        } catch (error) {
+            console.error('Connection error:', error);
+            alert('Failed to connect wallet');
+        }
+    }
+
+    // Update UI based on wallet connection
+    function updateWalletUI() {
+        if (walletConnected) {
+            phantomConnect.innerHTML = `
+                <img src="https://phantom.app/favicon.ico" alt="Phantom">
+                ${publicKey.slice(0, 4)}...${publicKey.slice(-4)}
+            `;
+            
+            // Enable subscription button
+            subscribeBtn.onclick = processSubscription;
+            watchlistBtn.onclick = addToWatchlist;
+        }
+    }
+
+    // Process subscription payment
+    async function processSubscription() {
+        if (!walletConnected) {
+            alert('Please connect your wallet first');
+            return;
+        }
+        
+        subscribeBtn.innerHTML = '<div class="loading"></div> Processing...';
+        
+        try {
+            // Simulate transaction (in a real app, you would send an actual transaction)
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Show success message
+            subscribeBtn.textContent = 'Subscribed!';
+            subscribeBtn.style.backgroundColor = 'var(--positive)';
+            
+            alert('Subscription successful! Thank you for your payment.');
+        } catch (error) {
+            console.error('Payment error:', error);
+            subscribeBtn.textContent = 'Try Again';
+            alert('Payment failed. Please try again.');
+        }
+    }
+
+    // Add to watchlist
+    async function addToWatchlist() {
+        if (!walletConnected) {
+            alert('Please connect your wallet first');
+            return;
+        }
+        
+        watchlistBtn.innerHTML = '<div class="loading"></div> Adding...';
+        
+        try {
+            // Simulate transaction
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Show success message
+            watchlistBtn.textContent = 'Added!';
+            watchlistBtn.style.backgroundColor = 'var(--positive)';
+        } catch (error) {
+            console.error('Error:', error);
+            watchlistBtn.textContent = 'Try Again';
+        }
+    }
+
+    // Initialize Phantom
+    phantomConnect.addEventListener('click', connectPhantom);
+    checkPhantom();
+
+    // Tooltip example
+    const tooltip = document.createElement('span');
+    tooltip.className = 'tooltiptext';
+    tooltip.textContent = 'Dis is how much ur portfolio worth (not much)';
+    document.querySelector('.price').classList.add('tooltip');
+    document.querySelector('.price').appendChild(tooltip);
+</script>
+
+</body></html>
